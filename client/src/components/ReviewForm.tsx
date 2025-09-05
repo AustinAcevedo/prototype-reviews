@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Star } from "lucide-react";
 import { insertReviewSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import StarRating from "./StarRating";
@@ -91,87 +92,94 @@ export default function ReviewForm() {
     createReviewMutation.isPending;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-8">
-      <h3 className="text-xl font-semibold mb-4" data-testid="review-form-title">
-        Submit a Review
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4" data-testid="review-form-title">
+        Submit a review
       </h3>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2" data-testid="username-label">
-            Your Name
-          </label>
-          <input
-            {...form.register("username")}
-            placeholder="Enter your name"
-            className="w-full p-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
-            data-testid="input-username"
-          />
-          {form.formState.errors.username && (
-            <p className="text-destructive text-sm mt-1" data-testid="error-username">
-              {form.formState.errors.username.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2" data-testid="rating-label">
-            Your Rating
-          </label>
-          <StarRating
-            rating={selectedRating}
-            hoveredRating={hoveredRating}
-            onRatingChange={handleRatingChange}
-            onHover={setHoveredRating}
-            onHoverLeave={() => setHoveredRating(0)}
-            size="lg"
-          />
+          <div className="flex items-center gap-1 mb-4">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={`w-6 h-6 cursor-pointer transition-colors duration-150 ${
+                  star <= (hoveredRating || selectedRating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "fill-transparent text-gray-300 stroke-2"
+                }`}
+                onClick={() => handleRatingChange(star)}
+                onMouseEnter={() => setHoveredRating(star)}
+                onMouseLeave={() => setHoveredRating(0)}
+                data-testid={`star-${star}`}
+              />
+            ))}
+          </div>
           {form.formState.errors.rating && (
-            <p className="text-destructive text-sm mt-1" data-testid="error-rating">
+            <p className="text-red-500 text-sm mb-2" data-testid="error-rating">
               {form.formState.errors.rating.message}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2" data-testid="content-label">
-            Your Review
-          </label>
+          <input
+            {...form.register("username")}
+            placeholder="Your name (optional)"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-3"
+            data-testid="input-username"
+          />
           <Textarea
             {...form.register("content")}
-            placeholder="Type your review here..."
+            placeholder="Type your review here"
             rows={4}
-            className="resize-none"
+            className="resize-none w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             data-testid="textarea-review"
           />
           {hasProfanity && (
-            <p className="text-destructive text-sm mt-2" data-testid="error-profanity">
+            <p className="text-red-500 text-sm mt-2" data-testid="error-profanity">
               Please remove inappropriate language from your review.
             </p>
           )}
           {form.formState.errors.content && !hasProfanity && (
-            <p className="text-destructive text-sm mt-1" data-testid="error-content">
+            <p className="text-red-500 text-sm mt-2" data-testid="error-content">
               {form.formState.errors.content.message}
             </p>
           )}
         </div>
 
-        <div className="flex gap-3">
-          <Button
-            type="submit"
-            disabled={isSubmitDisabled}
-            data-testid="button-submit-review"
-          >
-            {createReviewMutation.isPending ? "Submitting..." : "Submit Review"}
-          </Button>
-          <Button
+        <div className="flex items-center gap-4">
+          <button
             type="button"
-            variant="outline"
-            onClick={handleCancel}
-            data-testid="button-cancel-review"
+            className="text-blue-600 text-sm hover:underline"
+            data-testid="link-content-guidelines"
           >
-            Cancel
-          </Button>
+            Content guidelines
+          </button>
+          
+          <div className="flex gap-3 ml-auto">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              data-testid="button-cancel-review"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitDisabled}
+              className={`px-6 py-2 rounded-lg font-medium ${
+                isSubmitDisabled
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              data-testid="button-submit-review"
+            >
+              {createReviewMutation.isPending ? "Submitting..." : "Submit"}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

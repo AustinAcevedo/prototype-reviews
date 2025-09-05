@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Star, ChevronDown, ThumbsUp, ThumbsDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import type { Review, RatingDistribution } from "@shared/schema";
+import type { Review, RatingDistribution as RatingDistributionType } from "@shared/schema";
 import StarRating from "@/components/StarRating";
 import RatingDistribution from "@/components/RatingDistribution";
 import ReviewCard from "@/components/ReviewCard";
@@ -26,7 +26,7 @@ export default function Marketplace() {
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
     : 0;
 
-  const ratingDistribution: RatingDistribution[] = [5, 4, 3, 2, 1].map(rating => {
+  const ratingDistribution: RatingDistributionType[] = [5, 4, 3, 2, 1].map(rating => {
     const count = reviews.filter(r => r.rating === rating).length;
     return {
       rating,
@@ -81,7 +81,7 @@ export default function Marketplace() {
   };
 
   const handleRatingFilter = (rating: string) => {
-    setRatingFilter(rating);
+    setRatingFilter(rating === ratingFilter ? "all" : rating);
   };
 
   if (isLoading) {
@@ -154,62 +154,99 @@ export default function Marketplace() {
 
       {/* Reviews & Ratings Section */}
       <div id="reviews-section" className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold text-foreground mb-8" data-testid="reviews-heading">
-          Reviews & Ratings
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8" data-testid="reviews-heading">
+          Reviews & ratings
         </h2>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Overall Rating Card */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="text-center">
-              <div className="text-5xl font-bold text-foreground mb-2" data-testid="text-overall-rating">
-                {overallRating.toFixed(1)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
+          {/* Overall Rating */}
+          <div className="flex flex-col items-start">
+            <div className="mb-2">
+              <p className="text-sm text-gray-600 font-medium mb-2">OVERALL RATING</p>
+              <div className="text-5xl font-bold text-gray-900 mb-3" data-testid="text-overall-rating">
+                {overallRating.toFixed(1)} <span className="text-lg text-gray-500 font-normal">out of 5</span>
               </div>
-              <StarRating rating={overallRating} readonly size="xl" />
-              <p className="text-muted-foreground mt-2" data-testid="text-review-count">
-                Based on {totalReviews} reviews
-              </p>
+              <div className="flex items-center gap-1 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-8 h-8 ${
+                      star <= Math.round(overallRating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "fill-gray-200 text-gray-200"
+                    }`}
+                    data-testid={`overall-star-${star}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Rating Distribution */}
+            <div className="w-full">
+              <div className="space-y-2">
+                {ratingDistribution.map(({ rating, count, percentage }) => (
+                  <div
+                    key={rating}
+                    className="flex items-center gap-3 cursor-pointer group"
+                    onClick={() => handleRatingFilter(rating.toString())}
+                    data-testid={`rating-bar-${rating}`}
+                  >
+                    <span className="text-sm text-gray-900 w-3" data-testid={`rating-label-${rating}`}>
+                      {rating}
+                    </span>
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-yellow-400 h-2 rounded-full transition-all duration-300 group-hover:bg-yellow-500"
+                        style={{ width: `${percentage}%` }}
+                        data-testid={`rating-progress-${rating}`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Rating Distribution */}
-          <div className="lg:col-span-2">
-            <RatingDistribution 
-              distribution={ratingDistribution} 
-              onRatingClick={handleRatingFilter}
-            />
+          {/* Submit Review Form */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+            <ReviewForm />
           </div>
         </div>
 
-        {/* Submit Review Form */}
-        <ReviewForm />
 
-        {/* Filters */}
-        <ReviewFilters
-          sortFilter={sortFilter}
-          ratingFilter={ratingFilter}
-          onSortChange={setSortFilter}
-          onRatingChange={setRatingFilter}
-        />
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <h3 className="text-2xl font-semibold text-gray-900 mb-6" data-testid="reviews-section-title">
+            Reviews
+          </h3>
+          
+          {/* Filters */}
+          <ReviewFilters
+            sortFilter={sortFilter}
+            ratingFilter={ratingFilter}
+            onSortChange={setSortFilter}
+            onRatingChange={setRatingFilter}
+          />
 
-        {/* Reviews List */}
-        <div className="space-y-6" data-testid="reviews-list">
-          {filteredReviews.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg" data-testid="text-no-reviews">
-                No reviews match your current filters.
-              </p>
-            </div>
-          ) : (
-            filteredReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                onLike={() => likeMutation.mutate(review.id)}
-                onDislike={() => dislikeMutation.mutate(review.id)}
-              />
-            ))
-          )}
+          {/* Reviews List */}
+          <div className="space-y-6" data-testid="reviews-list">
+            {filteredReviews.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg" data-testid="text-no-reviews">
+                  No reviews match your current filters.
+                </p>
+              </div>
+            ) : (
+              filteredReviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onLike={() => likeMutation.mutate(review.id)}
+                  onDislike={() => dislikeMutation.mutate(review.id)}
+                />
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Star, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { Review } from "@shared/schema";
 import StarRating from "./StarRating";
@@ -47,55 +47,93 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
   };
 
   return (
-    <div className="review-card bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-semibold">
+    <div className="bg-white border-b border-gray-100 py-4">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm">
           {getInitials(review.username)}
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h4 className="font-semibold" data-testid={`reviewer-name-${review.id}`}>
-              {review.username}
-            </h4>
-            <StarRating rating={review.rating} readonly size="sm" />
-            <span className="text-sm text-muted-foreground" data-testid={`review-date-${review.id}`}>
-              {formatDate(review.createdAt)}
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-semibold text-gray-900" data-testid={`reviewer-name-${review.id}`}>
+                  {review.username}
+                </h4>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-4 h-4 ${
+                        star <= review.rating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "fill-gray-200 text-gray-200"
+                      }`}
+                      data-testid={`review-star-${star}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <span className="text-sm text-gray-500" data-testid={`review-date-${review.id}`}>
+              Posted {formatDate(review.createdAt)}
             </span>
           </div>
-          <p className="text-foreground mb-3" data-testid={`review-content-${review.id}`}>
+          <p className="text-gray-700 mb-3 leading-relaxed" data-testid={`review-content-${review.id}`}>
             {review.content}
           </p>
-          <div className="flex items-center gap-4">
-            <button
-              className={cn(
-                "flex items-center gap-2 transition-colors",
-                isLiked
-                  ? "text-blue-500"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              onClick={handleLike}
-              data-testid={`button-like-${review.id}`}
-            >
-              <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
-              <span data-testid={`likes-count-${review.id}`}>
-                {review.likes + (isLiked ? 1 : 0)}
-              </span>
-            </button>
-            <button
-              className={cn(
-                "flex items-center gap-2 transition-colors",
-                isDisliked
-                  ? "text-red-500"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              onClick={handleDislike}
-              data-testid={`button-dislike-${review.id}`}
-            >
-              <ThumbsDown className={cn("w-4 h-4", isDisliked && "fill-current")} />
-              <span data-testid={`dislikes-count-${review.id}`}>
-                {review.dislikes + (isDisliked ? 1 : 0)}
-              </span>
-            </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                className={cn(
+                  "flex items-center gap-1 text-sm transition-colors",
+                  isLiked
+                    ? "text-blue-600"
+                    : "text-gray-500 hover:text-gray-700"
+                )}
+                onClick={handleLike}
+                data-testid={`button-like-${review.id}`}
+              >
+                <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
+                <span data-testid={`likes-count-${review.id}`}>
+                  {review.likes + (isLiked ? 1 : 0)}
+                </span>
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                className="text-gray-500 hover:text-gray-700 text-sm"
+                data-testid={`button-reply-${review.id}`}
+              >
+                Reply
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="text-blue-600 hover:text-blue-800 text-sm"
+                data-testid={`button-edit-${review.id}`}
+              >
+                Edit
+              </button>
+              <button
+                className="text-blue-600 hover:text-blue-800 text-sm"
+                data-testid={`button-delete-${review.id}`}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+          {/* Developer response section */}
+          <div className="mt-4 bg-gray-50 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-xs font-medium text-gray-600">D</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Developer response</span>
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <span className="text-xs text-gray-500 ml-auto">Replied {formatDate(review.createdAt)}</span>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Thanks for the awesome feedback! We're thrilled to hear the JIRA app for Zoom is making your workflow smoother and keeping your team aligned. Our goal is to help teams stay productive without context switching, so it's great to know it's working for you. If you have any suggestions for new features or improvements, let us know — we're all ears!
+            </p>
           </div>
         </div>
       </div>
