@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Star, MoreHorizontal, ChevronDown } from "lucide-react";
+import { Star, MoreHorizontal, ChevronDown, CheckCircle } from "lucide-react";
 import { insertReviewSchema, type Review } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import StarRating from "./StarRating";
@@ -70,8 +70,13 @@ export default function ReviewForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       setSubmittedReview(newReview);
       toast({
-        title: "Review submitted!",
-        description: "Thank you for your feedback.",
+        variant: "success" as any,
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <span>Your review has been successfully posted.</span>
+          </div>
+        ),
       });
     },
     onError: () => {
@@ -126,8 +131,13 @@ export default function ReviewForm() {
         setShowDeleteDialog(false);
         handleCancel();
         toast({
-          title: "Review deleted",
-          description: "Your review has been removed.",
+          variant: "success" as any,
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>Your review has been successfully deleted.</span>
+            </div>
+          ),
         });
       } catch (error) {
         toast({
