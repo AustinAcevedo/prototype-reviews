@@ -7,16 +7,21 @@ import { cn } from "@/lib/utils";
 interface ReviewCardProps {
   review: Review;
   onLike: () => void;
+  onUnlike: () => void;
   onDislike: () => void;
+  onUndislike: () => void;
 }
 
-export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProps) {
+export default function ReviewCard({ review, onLike, onUnlike, onDislike, onUndislike }: ReviewCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isResponseExpanded, setIsResponseExpanded] = useState(false);
 
   const handleLike = () => {
-    if (!isLiked) {
+    if (isLiked) {
+      setIsLiked(false);
+      onUnlike();
+    } else {
       setIsLiked(true);
       setIsDisliked(false);
       onLike();
@@ -24,7 +29,10 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
   };
 
   const handleDislike = () => {
-    if (!isDisliked) {
+    if (isDisliked) {
+      setIsDisliked(false);
+      onUndislike();
+    } else {
       setIsDisliked(true);
       setIsLiked(false);
       onDislike();

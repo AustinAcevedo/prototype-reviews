@@ -5,7 +5,9 @@ export interface IStorage {
   getReviews(): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
   likeReview(id: string): Promise<Review | undefined>;
+  unlikeReview(id: string): Promise<Review | undefined>;
   dislikeReview(id: string): Promise<Review | undefined>;
+  undislikeReview(id: string): Promise<Review | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -173,10 +175,30 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async unlikeReview(id: string): Promise<Review | undefined> {
+    const review = this.reviews.get(id);
+    if (review && review.likes > 0) {
+      const updatedReview = { ...review, likes: review.likes - 1 };
+      this.reviews.set(id, updatedReview);
+      return updatedReview;
+    }
+    return undefined;
+  }
+
   async dislikeReview(id: string): Promise<Review | undefined> {
     const review = this.reviews.get(id);
     if (review) {
       const updatedReview = { ...review, dislikes: review.dislikes + 1 };
+      this.reviews.set(id, updatedReview);
+      return updatedReview;
+    }
+    return undefined;
+  }
+
+  async undislikeReview(id: string): Promise<Review | undefined> {
+    const review = this.reviews.get(id);
+    if (review && review.dislikes > 0) {
+      const updatedReview = { ...review, dislikes: review.dislikes - 1 };
       this.reviews.set(id, updatedReview);
       return updatedReview;
     }

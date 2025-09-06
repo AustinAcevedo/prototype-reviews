@@ -74,8 +74,22 @@ export default function Marketplace() {
     },
   });
 
+  const unlikeMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/reviews/${id}/unlike`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+    },
+  });
+
   const dislikeMutation = useMutation({
     mutationFn: (id: string) => apiRequest("POST", `/api/reviews/${id}/dislike`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+    },
+  });
+
+  const undislikeMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/reviews/${id}/undislike`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
     },
@@ -297,7 +311,9 @@ export default function Marketplace() {
                   key={review.id}
                   review={review}
                   onLike={() => likeMutation.mutate(review.id)}
+                  onUnlike={() => unlikeMutation.mutate(review.id)}
                   onDislike={() => dislikeMutation.mutate(review.id)}
+                  onUndislike={() => undislikeMutation.mutate(review.id)}
                 />
               ))
             )}

@@ -44,6 +44,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Unlike a review
+  app.post("/api/reviews/:id/unlike", async (req, res) => {
+    try {
+      const review = await storage.unlikeReview(req.params.id);
+      if (review) {
+        res.json(review);
+      } else {
+        res.status(404).json({ message: "Review not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to unlike review" });
+    }
+  });
+
   // Dislike a review
   app.post("/api/reviews/:id/dislike", async (req, res) => {
     try {
@@ -55,6 +69,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to dislike review" });
+    }
+  });
+
+  // Undislike a review
+  app.post("/api/reviews/:id/undislike", async (req, res) => {
+    try {
+      const review = await storage.undislikeReview(req.params.id);
+      if (review) {
+        res.json(review);
+      } else {
+        res.status(404).json({ message: "Review not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to undislike review" });
     }
   });
 
