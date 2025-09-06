@@ -17,6 +17,10 @@ export default function ReviewCard({ review, onLike, onUnlike, onDislike, onUndi
   const [isDisliked, setIsDisliked] = useState(false);
   const [isResponseExpanded, setIsResponseExpanded] = useState(false);
 
+  // Check if this review should have a developer response
+  // Only show developer responses for pre-seeded reviews (created before 2024-02-01)
+  const hasDeveloperResponse = new Date(review.createdAt) < new Date('2024-02-01');
+
   const handleLike = () => {
     if (isLiked) {
       setIsLiked(false);
@@ -122,26 +126,28 @@ export default function ReviewCard({ review, onLike, onUnlike, onDislike, onUndi
               </span>
             </button>
           </div>
-          {/* Developer response section */}
-          <div className="mt-4 bg-gray-50 rounded-lg p-4">
-            <button
-              className="flex items-center gap-2 w-full text-left"
-              onClick={() => setIsResponseExpanded(!isResponseExpanded)}
-              data-testid={`developer-response-toggle-${review.id}`}
-            >
-              <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-xs font-medium text-gray-600">D</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700">Developer response</span>
-              <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform", isResponseExpanded && "rotate-180")} />
-              <span className="text-xs text-gray-500 ml-auto">Replied {formatDate(review.createdAt)}</span>
-            </button>
-            {isResponseExpanded && (
-              <p className="text-sm text-gray-600 leading-relaxed mt-2 pl-8">
-                Thanks for the awesome feedback! We're thrilled to hear the JIRA app for Zoom is making your workflow smoother and keeping your team aligned. Our goal is to help teams stay productive without context switching, so it's great to know it's working for you. If you have any suggestions for new features or improvements, let us know — we're all ears!
-              </p>
-            )}
-          </div>
+          {/* Developer response section - only show for pre-existing reviews */}
+          {hasDeveloperResponse && (
+            <div className="mt-4 bg-gray-50 rounded-lg p-4">
+              <button
+                className="flex items-center gap-2 w-full text-left"
+                onClick={() => setIsResponseExpanded(!isResponseExpanded)}
+                data-testid={`developer-response-toggle-${review.id}`}
+              >
+                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-600">D</span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Developer response</span>
+                <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform", isResponseExpanded && "rotate-180")} />
+                <span className="text-xs text-gray-500 ml-auto">Replied {formatDate(review.createdAt)}</span>
+              </button>
+              {isResponseExpanded && (
+                <p className="text-sm text-gray-600 leading-relaxed mt-2 pl-8">
+                  Thanks for the awesome feedback! We're thrilled to hear the JIRA app for Zoom is making your workflow smoother and keeping your team aligned. Our goal is to help teams stay productive without context switching, so it's great to know it's working for you. If you have any suggestions for new features or improvements, let us know — we're all ears!
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
