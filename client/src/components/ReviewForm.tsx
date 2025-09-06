@@ -42,7 +42,10 @@ export default function ReviewForm() {
   });
 
   const createReviewMutation = useMutation({
-    mutationFn: (data: FormData) => apiRequest("POST", "/api/reviews", data),
+    mutationFn: async (data: FormData) => {
+      const response = await apiRequest("POST", "/api/reviews", data);
+      return response.json() as Promise<Review>;
+    },
     onSuccess: (newReview: Review) => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       setSubmittedReview(newReview);
