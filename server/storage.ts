@@ -8,6 +8,7 @@ export interface IStorage {
   unlikeReview(id: string): Promise<Review | undefined>;
   dislikeReview(id: string): Promise<Review | undefined>;
   undislikeReview(id: string): Promise<Review | undefined>;
+  deleteReview(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -203,6 +204,10 @@ export class MemStorage implements IStorage {
       return updatedReview;
     }
     return undefined;
+  }
+
+  async deleteReview(id: string): Promise<boolean> {
+    return this.reviews.delete(id);
   }
 }
 

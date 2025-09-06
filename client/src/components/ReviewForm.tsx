@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Star, MoreHorizontal } from "lucide-react";
+import { Star, MoreHorizontal, ChevronDown } from "lucide-react";
 import { insertReviewSchema, type Review } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import StarRating from "./StarRating";
@@ -29,6 +29,26 @@ export default function ReviewForm() {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [hasProfanity, setHasProfanity] = useState(false);
   const [submittedReview, setSubmittedReview] = useState<Review | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -87,6 +107,38 @@ export default function ReviewForm() {
     setHasProfanity(false);
   };
 
+  const handleEdit = () => {
+    if (submittedReview) {
+      form.setValue("content", submittedReview.content);
+      form.setValue("rating", submittedReview.rating);
+      setSelectedRating(submittedReview.rating);
+      setSubmittedReview(null);
+      setShowDropdown(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (submittedReview) {
+      try {
+        await apiRequest("DELETE", `/api/reviews/${submittedReview.id}`);
+        queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+        setSubmittedReview(null);
+        setShowDeleteDialog(false);
+        handleCancel();
+        toast({
+          title: "Review deleted",
+          description: "Your review has been removed.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete review. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const onSubmit = (data: FormData) => {
     if (!hasProfanity) {
       createReviewMutation.mutate(data);
@@ -115,38 +167,95 @@ export default function ReviewForm() {
   // If user has submitted a review, show the submitted review card instead
   if (submittedReview) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-6" data-testid="submitted-review-card">
-        <div className="flex items-start justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900" data-testid="your-review-title">
-            Your review
-          </h3>
-          <button className="text-gray-400 hover:text-gray-600" data-testid="button-review-menu">
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
+      <>
+        <div className="bg-white border border-gray-200 rounded-lg p-6" data-testid="submitted-review-card">
+          <div className="flex items-start justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900" data-testid="your-review-title">
+              Your review
+            </h3>
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                className="text-gray-400 hover:text-gray-600" 
+                onClick={() => setShowDropdown(!showDropdown)}
+                data-testid="button-review-menu"
+              >
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
+              
+              {showDropdown && (
+                <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10 min-w-[120px]" data-testid="review-dropdown-menu">
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={handleEdit}
+                    data-testid="button-edit-review"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                    onClick={() => {
+                      setShowDeleteDialog(true);
+                      setShowDropdown(false);
+                    }}
+                    data-testid="button-delete-review"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-1 mb-3">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={`w-5 h-5 ${
+                  star <= submittedReview.rating
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "fill-transparent text-gray-300"
+                }`}
+                data-testid={`submitted-star-${star}`}
+              />
+            ))}
+          </div>
+          
+          <p className="text-gray-700 mb-4" data-testid="submitted-review-content">
+            {submittedReview.content}
+          </p>
+          
+          <p className="text-sm text-gray-500" data-testid="submitted-review-date">
+            Posted {formatDate(submittedReview.createdAt)}
+          </p>
         </div>
-        
-        <div className="flex items-center gap-1 mb-3">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              className={`w-5 h-5 ${
-                star <= submittedReview.rating
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "fill-transparent text-gray-300"
-              }`}
-              data-testid={`submitted-star-${star}`}
-            />
-          ))}
-        </div>
-        
-        <p className="text-gray-700 mb-4" data-testid="submitted-review-content">
-          {submittedReview.content}
-        </p>
-        
-        <p className="text-sm text-gray-500" data-testid="submitted-review-date">
-          Posted {formatDate(submittedReview.createdAt)}
-        </p>
-      </div>
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-dialog-overlay">
+            <div className="bg-white rounded-lg p-6 max-w-sm mx-4" data-testid="delete-dialog">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Are you sure you want to delete this review?
+              </h3>
+              <div className="flex gap-3 justify-end">
+                <button
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
+                  onClick={() => setShowDeleteDialog(false)}
+                  data-testid="button-cancel-delete"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg"
+                  onClick={handleDeleteConfirm}
+                  data-testid="button-confirm-delete"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 

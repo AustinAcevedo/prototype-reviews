@@ -86,6 +86,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a review
+  app.delete("/api/reviews/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteReview(req.params.id);
+      if (success) {
+        res.json({ message: "Review deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Review not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete review" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
