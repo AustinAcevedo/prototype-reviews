@@ -99,12 +99,13 @@ export default function ReviewForm() {
     hasProfanity || 
     createReviewMutation.isPending;
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+  const formatDate = (date: Date | string) => {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString('en-US', {
       month: 'numeric',
       day: 'numeric',
       year: '2-digit'
-    }) + ' ' + date.toLocaleTimeString('en-US', {
+    }) + ' ' + dateObj.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
