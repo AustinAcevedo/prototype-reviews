@@ -3,8 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Star } from "lucide-react";
-import { insertReviewSchema } from "@shared/schema";
+import { Star, MoreHorizontal } from "lucide-react";
+import { insertReviewSchema, type Review } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import StarRating from "./StarRating";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export default function ReviewForm() {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [hasProfanity, setHasProfanity] = useState(false);
+  const [submittedReview, setSubmittedReview] = useState<Review | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -42,9 +43,9 @@ export default function ReviewForm() {
 
   const createReviewMutation = useMutation({
     mutationFn: (data: FormData) => apiRequest("POST", "/api/reviews", data),
-    onSuccess: () => {
+    onSuccess: (newReview: Review) => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
-      handleCancel();
+      setSubmittedReview(newReview);
       toast({
         title: "Review submitted!",
         description: "Thank you for your feedback.",
@@ -94,6 +95,56 @@ export default function ReviewForm() {
     selectedRating === 0 || 
     hasProfanity || 
     createReviewMutation.isPending;
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: '2-digit'
+    }) + ' ' + date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  // If user has submitted a review, show the submitted review card instead
+  if (submittedReview) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-6" data-testid="submitted-review-card">
+        <div className="flex items-start justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900" data-testid="your-review-title">
+            Your review
+          </h3>
+          <button className="text-gray-400 hover:text-gray-600" data-testid="button-review-menu">
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="flex items-center gap-1 mb-3">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`w-5 h-5 ${
+                star <= submittedReview.rating
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-transparent text-gray-300"
+              }`}
+              data-testid={`submitted-star-${star}`}
+            />
+          ))}
+        </div>
+        
+        <p className="text-gray-700 mb-4" data-testid="submitted-review-content">
+          {submittedReview.content}
+        </p>
+        
+        <p className="text-sm text-gray-500" data-testid="submitted-review-date">
+          Posted {formatDate(submittedReview.createdAt)}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
