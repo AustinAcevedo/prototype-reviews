@@ -230,12 +230,8 @@ export default function Marketplace() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
           {/* Overall Rating */}
           <div className="flex flex-col items-start">
-            <div className="mb-2">
-              <p className="text-sm text-gray-600 font-medium mb-2">OVERALL RATING</p>
-              <div className="text-5xl font-bold text-gray-900 mb-3" data-testid="text-overall-rating">
-                {overallRating.toFixed(1)} <span className="text-lg text-gray-500 font-normal">out of 5</span>
-              </div>
-              <div className="flex items-center gap-1 mb-4">
+            <div className="mb-6">
+              <div className="flex items-center gap-1 mb-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
@@ -247,6 +243,12 @@ export default function Marketplace() {
                     data-testid={`overall-star-${star}`}
                   />
                 ))}
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-semibold text-gray-600 tracking-wider mb-1">OVERALL RATING</div>
+                <div className="text-sm text-gray-600 font-medium">
+                  {overallRating.toFixed(1)} OUT OF 5
+                </div>
               </div>
             </div>
 
