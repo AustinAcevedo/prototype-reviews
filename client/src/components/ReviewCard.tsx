@@ -13,18 +13,23 @@ interface ReviewCardProps {
 export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [isResponseExpanded, setIsResponseExpanded] = useState(false);
 
   const handleLike = () => {
-    if (!isLiked) {
-      onLike();
+    onLike();
+    if (isLiked) {
+      setIsLiked(false);
+    } else {
       setIsLiked(true);
       setIsDisliked(false);
     }
   };
 
   const handleDislike = () => {
-    if (!isDisliked) {
-      onDislike();
+    onDislike();
+    if (isDisliked) {
+      setIsDisliked(false);
+    } else {
       setIsDisliked(true);
       setIsLiked(false);
     }
@@ -81,45 +86,57 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
           <p className="text-gray-700 mb-3 leading-relaxed" data-testid={`review-content-${review.id}`}>
             {review.content}
           </p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                className={cn(
-                  "flex items-center gap-1 text-sm transition-colors",
-                  isLiked
-                    ? "text-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
-                )}
-                onClick={handleLike}
-                data-testid={`button-like-${review.id}`}
-              >
-                <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
-                <span data-testid={`likes-count-${review.id}`}>
-                  {review.likes + (isLiked ? 1 : 0)}
-                </span>
-              </button>
-              <span className="text-gray-300">|</span>
-              <button
-                className="text-gray-500 hover:text-gray-700 text-sm"
-                data-testid={`button-reply-${review.id}`}
-              >
-                Reply
-              </button>
-            </div>
+          <div className="flex items-center gap-4">
+            <button
+              className={cn(
+                "flex items-center gap-1 text-sm transition-colors",
+                isLiked
+                  ? "text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              )}
+              onClick={handleLike}
+              data-testid={`button-like-${review.id}`}
+            >
+              <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
+              <span data-testid={`likes-count-${review.id}`}>
+                {review.likes + (isLiked ? 1 : 0)}
+              </span>
+            </button>
+            <button
+              className={cn(
+                "flex items-center gap-1 text-sm transition-colors",
+                isDisliked
+                  ? "text-red-600"
+                  : "text-gray-500 hover:text-gray-700"
+              )}
+              onClick={handleDislike}
+              data-testid={`button-dislike-${review.id}`}
+            >
+              <ThumbsDown className={cn("w-4 h-4", isDisliked && "fill-current")} />
+              <span data-testid={`dislikes-count-${review.id}`}>
+                {review.dislikes + (isDisliked ? 1 : 0)}
+              </span>
+            </button>
           </div>
           {/* Developer response section */}
           <div className="mt-4 bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
+            <button
+              className="flex items-center gap-2 w-full text-left"
+              onClick={() => setIsResponseExpanded(!isResponseExpanded)}
+              data-testid={`developer-response-toggle-${review.id}`}
+            >
               <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-xs font-medium text-gray-600">D</span>
               </div>
               <span className="text-sm font-medium text-gray-700">Developer response</span>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform", isResponseExpanded && "rotate-180")} />
               <span className="text-xs text-gray-500 ml-auto">Replied {formatDate(review.createdAt)}</span>
-            </div>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Thanks for the awesome feedback! We're thrilled to hear the JIRA app for Zoom is making your workflow smoother and keeping your team aligned. Our goal is to help teams stay productive without context switching, so it's great to know it's working for you. If you have any suggestions for new features or improvements, let us know — we're all ears!
-            </p>
+            </button>
+            {isResponseExpanded && (
+              <p className="text-sm text-gray-600 leading-relaxed mt-2 pl-8">
+                Thanks for the awesome feedback! We're thrilled to hear the JIRA app for Zoom is making your workflow smoother and keeping your team aligned. Our goal is to help teams stay productive without context switching, so it's great to know it's working for you. If you have any suggestions for new features or improvements, let us know — we're all ears!
+              </p>
+            )}
           </div>
         </div>
       </div>
