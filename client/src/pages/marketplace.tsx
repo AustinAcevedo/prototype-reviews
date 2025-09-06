@@ -19,6 +19,13 @@ export default function Marketplace() {
   const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [sortFilter, setSortFilter] = useState<string>("newest");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  
+  const reviewsPerPage = 5;
+  const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+  const startIndex = (currentPage - 1) * reviewsPerPage;
+  const endIndex = startIndex + reviewsPerPage;
+  const paginatedReviews = filteredReviews.slice(startIndex, endIndex);
 
   // Calculate overall rating and distribution
   const totalReviews = reviews.length;
@@ -57,6 +64,7 @@ export default function Marketplace() {
     });
 
     setFilteredReviews(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [reviews, ratingFilter, sortFilter]);
 
   const likeMutation = useMutation({
@@ -284,7 +292,7 @@ export default function Marketplace() {
                 </p>
               </div>
             ) : (
-              filteredReviews.map((review) => (
+              paginatedReviews.map((review) => (
                 <ReviewCard
                   key={review.id}
                   review={review}
@@ -294,6 +302,52 @@ export default function Marketplace() {
               ))
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8" data-testid="pagination">
+              {/* Previous button */}
+              <button
+                className="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                data-testid="pagination-prev"
+              >
+                <ChevronDown className="w-4 h-4 rotate-90" />
+              </button>
+
+              {/* Page numbers */}
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNumber = index + 1;
+                const isCurrentPage = pageNumber === currentPage;
+                
+                return (
+                  <button
+                    key={pageNumber}
+                    className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                      isCurrentPage
+                        ? "bg-blue-600 text-white"
+                        : "text-blue-600 hover:bg-blue-50"
+                    }`}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    data-testid={`pagination-${pageNumber}`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+
+              {/* Next button */}
+              <button
+                className="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                data-testid="pagination-next"
+              >
+                <ChevronDown className="w-4 h-4 -rotate-90" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
