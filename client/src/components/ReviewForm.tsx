@@ -18,7 +18,11 @@ const formSchema = insertReviewSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-const profanityWords = ["damn", "shit", "fuck", "stupid", "hate", "terrible", "awful", "horrible", "sucks"];
+const profanityWords = [
+  "damn", "shit", "fuck", "stupid", "hate", "terrible", "awful", "horrible", "sucks",
+  "ass", "asshole", "bitch", "bastard", "hell", "crap", "piss", "dick", "cock", 
+  "pussy", "slut", "whore", "faggot", "retard", "idiot", "moron", "dumbass"
+];
 
 export default function ReviewForm() {
   const [selectedRating, setSelectedRating] = useState(0);
@@ -30,7 +34,7 @@ export default function ReviewForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      username: "Anonymous",
       rating: 0,
       content: "",
     },
@@ -123,12 +127,6 @@ export default function ReviewForm() {
         </div>
 
         <div>
-          <input
-            {...form.register("username")}
-            placeholder="Your name (optional)"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-3"
-            data-testid="input-username"
-          />
           <Textarea
             {...form.register("content")}
             placeholder="Type your review here"
