@@ -106,20 +106,6 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
                 Reply
               </button>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="text-blue-600 hover:text-blue-800 text-sm"
-                data-testid={`button-edit-${review.id}`}
-              >
-                Edit
-              </button>
-              <button
-                className="text-blue-600 hover:text-blue-800 text-sm"
-                data-testid={`button-delete-${review.id}`}
-              >
-                Delete
-              </button>
-            </div>
           </div>
           {/* Developer response section */}
           <div className="mt-4 bg-gray-50 rounded-lg p-4">
