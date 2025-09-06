@@ -16,22 +16,18 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
   const [isResponseExpanded, setIsResponseExpanded] = useState(false);
 
   const handleLike = () => {
-    onLike();
-    if (isLiked) {
-      setIsLiked(false);
-    } else {
+    if (!isLiked) {
       setIsLiked(true);
       setIsDisliked(false);
+      onLike();
     }
   };
 
   const handleDislike = () => {
-    onDislike();
-    if (isDisliked) {
-      setIsDisliked(false);
-    } else {
+    if (!isDisliked) {
       setIsDisliked(true);
       setIsLiked(false);
+      onDislike();
     }
   };
 
@@ -99,7 +95,7 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
             >
               <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
               <span data-testid={`likes-count-${review.id}`}>
-                {review.likes + (isLiked ? 1 : 0)}
+                {review.likes}
               </span>
             </button>
             <button
@@ -114,7 +110,7 @@ export default function ReviewCard({ review, onLike, onDislike }: ReviewCardProp
             >
               <ThumbsDown className={cn("w-4 h-4", isDisliked && "fill-current")} />
               <span data-testid={`dislikes-count-${review.id}`}>
-                {review.dislikes + (isDisliked ? 1 : 0)}
+                {review.dislikes}
               </span>
             </button>
           </div>
