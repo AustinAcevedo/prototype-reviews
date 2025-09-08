@@ -209,12 +209,6 @@ export default function Marketplace() {
                 >
                   Add
                 </button>
-                <button 
-                  className="border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent transition-colors"
-                  data-testid="button-wishlist"
-                >
-                  Wishlist
-                </button>
               </div>
             </div>
           </div>
