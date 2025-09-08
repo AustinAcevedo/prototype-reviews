@@ -204,10 +204,10 @@ export default function Marketplace() {
               
               <div className="flex gap-3">
                 <button 
-                  className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                  className="px-6 py-3 rounded-lg font-semibold transition-colors text-white" style={{backgroundColor: '#0D6BDE'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#0B5BBD'} onMouseLeave={(e) => e.target.style.backgroundColor = '#0D6BDE'}
                   data-testid="button-install"
                 >
-                  Install
+                  Add
                 </button>
                 <button 
                   className="border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent transition-colors"
@@ -320,7 +320,7 @@ export default function Marketplace() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8" data-testid="pagination">
+            <div className="flex items-center justify-start gap-2 mt-8" data-testid="pagination">
               {/* Previous button */}
               <button
                 className="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
