@@ -19,8 +19,7 @@ export default function RatingDistribution({
         {distribution.map(({ rating, count, percentage }) => (
           <div
             key={rating}
-            className="flex items-center gap-3 progress-bar cursor-pointer rounded-lg p-2 hover:bg-accent transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-            onClick={() => onRatingClick(rating.toString())}
+            className="flex items-center gap-3 rounded-lg p-2"
             data-testid={`rating-bar-${rating}`}
           >
             <span className="text-sm font-medium w-8" data-testid={`rating-label-${rating}`}>
