@@ -256,8 +256,7 @@ export default function Marketplace() {
                 {ratingDistribution.map(({ rating, count, percentage }) => (
                   <div
                     key={rating}
-                    className="flex items-center gap-3 cursor-pointer group"
-                    onClick={() => handleRatingFilter(rating.toString())}
+                    className="flex items-center gap-3"
                     data-testid={`rating-bar-${rating}`}
                   >
                     <span className="text-sm text-gray-900 w-3" data-testid={`rating-label-${rating}`}>
@@ -265,7 +264,7 @@ export default function Marketplace() {
                     </span>
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-yellow-400 h-2 rounded-full transition-all duration-300 group-hover:bg-yellow-500"
+                        className="bg-yellow-400 h-2 rounded-full"
                         style={{ width: `${percentage}%` }}
                         data-testid={`rating-progress-${rating}`}
                       />
